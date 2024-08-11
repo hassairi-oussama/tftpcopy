@@ -1,0 +1,73 @@
+# Import the Paramiko library for SSH communication
+#import paramiko
+import warnings
+from cryptography.utils import CryptographyDeprecationWarning
+with warnings.catch_warnings(action="ignore", category=CryptographyDeprecationWarning):
+    import paramiko
+import time
+
+
+swip=['172.20.60.117', '172.20.60.217', '172.20.60.137']
+i=0
+
+def cisco_copy_running_config(hostname, username, password, tftp_filename):
+    # Hardcoded TFTP server and filename
+    tftp_server = "172.20.1.24"
+   
+
+    # Create an SSH client
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        # Connect to the router using provided credentials
+        ssh.connect(hostname, username=username, password=password, allow_agent=False, look_for_keys=False)
+
+        # Create a shell channel for interaction
+        channel = ssh.invoke_shell()
+
+        # Wait for the prompt after connecting
+        time.sleep(2)
+        output = channel.recv(65535).decode('utf-8')
+        print(output)
+        time.sleep(1)
+
+        # Copy running config to TFTP server
+        channel.send(f"copy running-config tftp://{tftp_server}/{tftp_filename}\n")
+        time.sleep(1)  # Adjust the sleep time as needed
+
+        channel.send(f"\n")
+        time.sleep(5)  # Adjust the sleep time as needed                
+
+        channel.send(f"\n")
+        time.sleep(5)  # Adjust the sleep time as needed                
+
+                # Check if the copy was successful
+        copy_output = channel.recv(65535).decode('utf-8')
+        print(copy_output)
+
+        
+        # Close the SSH connection
+        ssh.close()
+
+    except Exception as e:
+        # Handle exceptions and print an error message
+        print(f"Error: {e}")
+        print("Copy failed!")
+
+# Entry point of the script
+if __name__ == "__main__":
+    # Replace these values with your router's information
+    
+    router_username = "admin"
+    router_password = "password"
+    
+
+    # Call the function to copy running config to TFTP server
+    while i < len(swip):
+        router_hostname=swip[i]
+        tftp_filename='config-of-'+router_hostname+'.txt'
+        print('working on ',router_hostname)
+        cisco_copy_running_config(router_hostname, router_username, router_password, tftp_filename)
+        i = i + 1
+    
