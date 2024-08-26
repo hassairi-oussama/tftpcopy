@@ -20,7 +20,7 @@ def cisco_copy_running_config(hostname, username, password, tftp_filename):
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     try:
-        # Connect to the router using provided credentials
+        # Connect to the sw using provided credentials
         ssh.connect(hostname, username=username, password=password, allow_agent=False, look_for_keys=False)
 
         # Create a shell channel for interaction
@@ -57,17 +57,17 @@ def cisco_copy_running_config(hostname, username, password, tftp_filename):
 
 # Entry point of the script
 if __name__ == "__main__":
-    # Replace these values with your router's information
+    # Replace these values with your sw's information
     
-    router_username = "admin"
-    router_password = "password"
+    sw_username = "admin"
+    sw_password = "password"
     
 
     # Call the function to copy running config to TFTP server
     while i < len(swip):
-        router_hostname=swip[i]
-        tftp_filename='config-of-'+router_hostname+'.txt'
-        print('working on ',router_hostname)
-        cisco_copy_running_config(router_hostname, router_username, router_password, tftp_filename)
+        sw_hostname=swip[i]
+        tftp_filename='config-of-'+sw_hostname+'.txt'
+        print('working on ',sw_hostname)
+        cisco_copy_running_config(sw_hostname, sw_username, sw_password, tftp_filename)
         i = i + 1
     
